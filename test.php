@@ -139,6 +139,11 @@ try {
 
 /* @var $chessman \App\Interfaces\IChassman */
 
+echo "\nДобавляем callback как анонимную функцию ... ";
+$board->setCallback( function ( $type ) {
+  echo "вызван анонимный callback({$type}) ... ";
+});
+
 echo "\nПолучаем свободную фигуру ( координаты [0,0] )... ";
 if( ! $chessman = $board->getChessmanAt( 0, 0)) {
   echo " НЕУДАЧА!\n";
@@ -179,6 +184,15 @@ try {
 } if( ! $caught ) {
   echo " Успешно.\n";
 }
+
+echo "\nДобавляем callback как метод класса ... ";
+class Temp {
+  public function callback( $type ) {
+    echo "вызван Temp::callback({$type}) ... ";
+  }
+}
+$temp = new Temp();
+$board->setCallback( [ $temp, 'callback'] );
 
 echo "\nПолучаем свободную фигуру ... ";
 if( ! $chessman = $board->getChessmanAt( 0, 0)) {
@@ -232,13 +246,14 @@ try {
   echo " Успешно.\n";
 }
 
-echo "\nПолучаем свободную фигуру и ставим на поле [1,1] ... ";
+echo "\nПолучаем свободную фигуру ... ";
 if( ! $chessman = $board->getChessmanAt( 0, 0)) {
   echo " НЕУДАЧА!\n";
   echo "    Ошибка: Нет свободных фигур\n";
 } else {
   echo " Успешно.\n";
 }
+echo "Cтавим на поле [1,1] ... ";
 try {
   $chessman->setAtPosition( 1, 1);
 } catch( Exception $exc ) {

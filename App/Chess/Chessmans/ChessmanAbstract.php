@@ -106,6 +106,7 @@ abstract class ChessmanAbstract implements IChassman {
       $this->row = $row;
       $this->column = $column;
       $this->onBoard = true;
+      $this->board->onSet( $this->getType());
     } else {
       throw new ChessmanException('Already on board');
     }

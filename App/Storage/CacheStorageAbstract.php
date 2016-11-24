@@ -21,6 +21,11 @@ abstract class CacheStorageAbstract implements IStorage {
     $this->setStorage();
   }
 
+  /**
+   * Check the storage
+   * 
+   * @throws CacheStorageAbstractException
+   */
   protected function checkStorage() {
     if( ! $this->storage ) {
       throw new CacheStorageAbstractException('Storage does not assigned');

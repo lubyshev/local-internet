@@ -15,6 +15,8 @@ class Board {
 
   protected $dimension;
 
+  protected $onSetCallback;
+
   protected $storage;
 
   /**
@@ -32,6 +34,13 @@ class Board {
     }
   }
 
+  /**
+   * Add a custom chessman to the board
+   *
+   * @param IChassman $chessman
+   * @return \App\Chess\Board
+   * @throws BoardException
+   */
   public function addChessman( IChassman $chessman ) {
     $chessmanType = $chessman->getType();
     if( ! isset( $this->chessmanTypes[ $chessmanType ])) {
@@ -45,6 +54,15 @@ class Board {
     return $this;
   }
 
+  /**
+   * Add custom chessman type
+   *
+   * @param type $chessmanType Unique type name
+   * @param type $chessmanClass Class of the chessman
+   *
+   * @return \App\Chess\Board
+   * @throws BoardException
+   */
   public function addChessmanType( $chessmanType, $chessmanClass ) {
     if( ! isset( $this->chessmanTypes[ $chessmanType ])) {
       $this->chessmanTypes[ $chessmanType ] = $chessmanClass;
@@ -54,6 +72,14 @@ class Board {
     return $this;
   }
 
+  /**
+   * Check if position on the board is empty
+   *
+   * @param type $row Row
+   * @param type $column Column
+   *
+   * @return boolean
+   */
   public function cellIsEmpty( $row, $column ) {
     $result = true;
     foreach( $this->chessmans as $item ) {
@@ -66,6 +92,13 @@ class Board {
     return $result;
   }
 
+  /**
+   * Check positon coordinates
+   *
+   * @param type $row
+   * @param type $column
+   * @throws BoardException
+   */
   protected function checkPosition( $row, $column ) {
     if(  $row < 0
       || $column < 0
@@ -78,6 +111,14 @@ class Board {
     }
   }
 
+  /**
+   * Return chessman at specific positioin
+   *
+   * @param type $row Row
+   * @param type $column Column
+   *
+   * @return \App\Interfaces\IChassman
+   */
   public function getChessmanAt( $row, $column ) {
     $this->checkPosition( $row, $column);
     $result = null;
@@ -91,10 +132,20 @@ class Board {
     return $result;
   }
 
+  /**
+   * Returns the board dimension
+   *
+   * @return int
+   */
   public function getDimension() {
     return $this->dimension;
   }
 
+  /**
+   * Returns current chess position as array
+   *
+   * @return array
+   */
   public function getChessPosition() {
     $position = [];
     $row = 0;
@@ -113,12 +164,42 @@ class Board {
     return $position;
   }
 
+  /**
+   * Fired when a chessmen sets on the board
+   * @param string $type Chessman type
+   */
+  public function onSet( $type ) {
+    if( isset( $this->onSetCallback)) {
+      if( is_callable( $this->onSetCallback)) {
+        $func = $this->onSetCallback;
+        $func( $type );
+      }
+    }
+  }
+
+  /**
+   * Reset the board
+   */
   public function reset() {
     $this->dimension = 0;
     $this->chessmanTypes = [];
     $this->chessmans = [];
   }
 
+  /**
+   * Sets callback triggered when a chessmen sets on the board
+   *
+   * @param mixed $callback Closure or array [class,method]
+   */
+  public function setCallback( $callback ) {
+    $this->onSetCallback = $callback;
+  }
+
+  /**
+   * Encode current board state
+   *
+   * @return string
+   */
   public function stateEncode() {
     $data = [ 'dimension' => $this->dimension ];
     if( ! empty( $this->chessmanTypes)) {
@@ -139,6 +220,14 @@ class Board {
     return json_encode( $data );
   }
 
+  /**
+   * Restore board state from previously encoded board state
+   *
+   * @param string $state Encoded board state
+   *
+   * @return bool TRUE on success, FALSE otherwise
+   * @throws BoardException
+   */
   public function stateDecode( $state ) {
     if( ! $data = json_decode( $state, true)) {
       throw new BoardException("Invalid state data");
@@ -167,6 +256,14 @@ class Board {
     return true;
   }
 
+  /**
+   * Load state of a board from storage
+   *
+   * @param string $name Saved state name
+   * @param \App\Interfaces\IStorage $storage Storage instance
+   * @return bool TRUE on success, FALSE otherwise
+   * @throws BoardException
+   */
   public function stateLoad( $name, IStorage $storage = null) {
     if( ! $storage ) {
       $storage = $this->storage;
@@ -177,6 +274,13 @@ class Board {
     return $storage->load( $name, $this );
   }
 
+  /**
+   * Save the current board state to a storage
+   * @param string $name Name of saved state
+   * @param \App\Interfaces\IStorage $storage Storage instance
+   * @return bool TRUE on success, FALSE otherwise
+   * @throws BoardException
+   */
   public function stateSave( $name, IStorage $storage = null) {
     if( ! $storage ) {
       $storage = $this->storage;

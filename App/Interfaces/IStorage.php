@@ -20,7 +20,7 @@ interface IStorage {
    *
    * @param string $name Unique name of a chess board
    * @param \App\Chess\Board $board Board instance
-   * 
+   *
    * @return bool TRUE on success, FALSE otherwise
    */
   public function load( $name, Board $board );
